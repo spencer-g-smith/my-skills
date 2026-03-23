@@ -1,6 +1,6 @@
 ---
 name: init-project
-description: Scaffold a new project from a golden template (app or static), create a GitHub repo, write CLAUDE.md, seed default skills, and optionally deploy to Vercel with GitHub auto-deploy enabled by default. Use when Spencer asks to build a new app or start a new project.
+description: Scaffold a new personal project from a golden template (app or static), create a GitHub repo, write CLAUDE.md, seed default skills, and optionally deploy to Vercel with GitHub auto-deploy enabled by default. Use when Spencer asks to build a new app or start a new project. Do NOT use for personal projects.
 ---
 
 # Init Project — From Zero to Pod-Ready
