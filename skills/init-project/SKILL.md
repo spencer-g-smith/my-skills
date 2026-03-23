@@ -18,8 +18,8 @@ Creates a project from a golden template with GitHub + Vercel Git integration so
 
 | Template | When to use | Source |
 |---|---|---|
-| **App** | Interactive app with routes/state/components | `~/Projects/_Templates/golden-app-template` |
-| **Static** | Blog/docs/content/presentation site | `~/Projects/_Templates/golden-static-template` |
+| **App** | Interactive app with routes/state/components | `templates/golden-app-template` (relative to this skill) |
+| **Static** | Blog/docs/content/presentation site | `templates/golden-static-template` (relative to this skill) |
 
 Read the matching reference:
 - App → `references/template-app.md`
@@ -27,12 +27,18 @@ Read the matching reference:
 
 ## Step 2 — Scaffold
 
+Resolve the template path relative to this skill's location, then copy it to the project directory:
+
 ```bash
-cp -R ~/Projects/_Templates/<chosen-template> ~/Projects/<app-name>
+SKILL_DIR="$(dirname "$(readlink -f "$0" 2>/dev/null || echo "$PWD")")"
+# The templates live alongside this skill at: <skills-repo>/skills/init-project/templates/
+cp -R <skill-dir>/templates/<chosen-template> ~/Projects/<app-name>
 cd ~/Projects/<app-name>
 rm -rf .git .vercel node_modules bun.lock
 bun install
 ```
+
+> **Note:** `<skill-dir>` is the directory containing this SKILL.md file. Claude Code knows this path at runtime — use it to locate `templates/`.
 
 ## Step 3 — Template-Specific Setup
 
