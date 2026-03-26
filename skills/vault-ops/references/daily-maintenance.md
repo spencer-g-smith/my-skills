@@ -220,6 +220,7 @@ The detailed operations log lives in the report's `## Vault Ops` section — do 
 2. **Prioritized todos** — The top 3–5 most important items from `To Do's.md`, ordered by urgency/impact. Include carried-forward instructions from yesterday's `## Notes for Griffin`.
 3. Open loops from yesterday that have a next action
 4. Upcoming meetings or deadlines from context
+5. **Research briefing** — Execute `references/research-briefing.md` using tomorrow's priorities and open loops as input. Append result as `### Research briefing` in the morning brief. Skip if nothing clears the relevance bar.
 
 ---
 
@@ -232,5 +233,5 @@ The detailed operations log lives in the report's `## Vault Ops` section — do 
 - [ ] `To Do's.md` updated (new items, completed deleted, stale flagged, deduped)
 - [ ] Workbench sweep completed (keep/promote/archive)
 - [ ] Daily report written in `Daily/Reports/` as Spencer-day summary
-- [ ] Today's daily note created/updated with morning brief
+- [ ] Today's daily note created/updated with morning brief (including research briefing if relevant)
 - [ ] WhatsApp notification sent (best-effort)
