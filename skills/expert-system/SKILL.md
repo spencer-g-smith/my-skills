@@ -23,32 +23,34 @@ All requests require a Bearer token. Set via skill env in `~/.openclaw/openclaw.
 }
 ```
 
+All requests must include: `Authorization: Bearer $EXPERT_SYSTEM_API_KEY`
+
 ## Workflows
 
 ### Ad-hoc Research
 
 When the user asks about a specific topic (e.g., "what's happening with Zillow" or "latest on housing market"):
 
-1. **Search**: Use `search` with a natural-language query to find relevant takeaways. This returns lightweight results (title, summary, IDs). Use `--recent` to favor newer content.
-2. **Read takeaways**: Use `takeaways --ids` with IDs from search results to get the full takeaway text, references, and document URL.
+1. **Search**: Use semantic search with a natural-language query to find relevant takeaways. This returns lightweight results (title, summary, IDs). Use `recent=true` to favor newer content.
+2. **Read takeaways**: Fetch takeaways by ID to get the full takeaway text, references, and document URL.
 3. **Always cite sources**: When presenting data or making claims retrieved from the Expert System, you must include the source name and a direct link to the original document provided in the takeaway or document metadata.
-4. **If helpful; Read sources**: Use `documents --ids` with document IDs from takeaways to read the full source text.
+4. **If helpful; Read sources**: Fetch documents by ID to read the full source text.
 
 ### Passive News Briefing
 
 When browsing for what's new or running as a recurring job:
 
-1. **Research insights**: Use `research` to read the latest synthesized insights. These connect multiple takeaways into coherent analysis and are the highest-signal starting point.
-2. **Recent takeaways**: Use `takeaways-recent` to scan the latest raw takeaways across all sources.
-3. **Drill down**: Use `takeaways --ids` or `documents --ids` to go deeper on anything interesting.
+1. **Research insights**: Fetch the latest synthesized insights. These connect multiple takeaways into coherent analysis and are the highest-signal starting point.
+2. **Recent takeaways**: Fetch the latest raw takeaways across all sources.
+3. **Drill down**: Fetch takeaways or documents by ID to go deeper on anything interesting.
 
 ### Company Financial Analysis
 
 When the user asks about a company's financials, valuation, earnings, revenue, margins, balance sheet, cash flow, or any stock/company metric:
 
-1. **Query financials**: Use `financial --query` with a natural-language question. The system resolves ticker symbols and retrieves the relevant data (overview, income statement, balance sheet, cash flow).
+1. **Query financials**: POST a natural-language question. The system resolves ticker symbols and retrieves the relevant data (overview, income statement, balance sheet, cash flow).
 2. **Present results**: Format the returned data clearly, highlighting the specific metrics the user asked about.
-3. **Combine with research**: For deeper context, also use `search` to find relevant takeaways about the company (e.g., earnings call analysis, strategy commentary).
+3. **Combine with research**: For deeper context, also search for relevant takeaways about the company (e.g., earnings call analysis, strategy commentary).
 
 Available financial data includes: company overview & key metrics (P/E, EPS, market cap, margins, growth rates, analyst targets), quarterly income statements, quarterly balance sheets, and quarterly cash flow statements.
 
@@ -56,97 +58,72 @@ Available financial data includes: company overview & key metrics (P/E, EPS, mar
 
 When the user asks about macroeconomic conditions, interest rates, inflation, employment, GDP, housing, or any economic indicator:
 
-1. **Query macro data**: Use `macro --query` with a natural-language question. The system queries the relevant FRED series and returns the data.
+1. **Query macro data**: POST a natural-language question. The system queries the relevant FRED series and returns the data.
 2. **Present results**: Format the returned data clearly, highlighting trends and the specific indicators the user asked about.
-3. **Combine with research**: For deeper context, also use `search` to find relevant expert takeaways on the macro topic.
+3. **Combine with research**: For deeper context, also search for relevant expert takeaways on the macro topic.
 
 Available macro data covers: GDP & real economy, labor market (unemployment, payrolls, JOLTS), inflation (CPI, PCE, trimmed-mean), wages & income, monetary policy & Fed liquidity, interest rates & yield curve, credit & financial stress, housing (starts, permits, prices, mortgage rates), and consumer sentiment.
 
-## Commands
+## API Reference
 
 Base URL: `https://expert-system.starmode.dev/api/v1`
 
-### 1. Semantic Search (primary entry point)
+### 1. Semantic Search — `GET /takeaways/search`
 
 Search across all takeaways by meaning. Returns titles, summaries, and IDs for drill-down.
 
-```bash
-EXPERT_SYSTEM_API_KEY="$EXPERT_SYSTEM_API_KEY" python3 {baseDir}/scripts/query.py search --query "enterprise AI agent architecture"
-EXPERT_SYSTEM_API_KEY="$EXPERT_SYSTEM_API_KEY" python3 {baseDir}/scripts/query.py search --query "procurement automation" --limit 20 --recent
-```
+| Param | Required | Default | Notes |
+|-------|----------|---------|-------|
+| `query` | yes | — | Natural-language search string |
+| `limit` | no | 10 | Max 100 |
+| `recent` | no | — | Set to `true` for time-weighted reranking |
 
-- `--query TEXT` (required, natural-language search string)
-- `--limit N` (optional, default 10, max 100)
-- `--recent` (optional, time-weighted reranking to favor newer content)
-
-### 2. Takeaways by ID
+### 2. Takeaways by ID — `GET /takeaways`
 
 Fetch full takeaway text and references for specific IDs returned by search.
 
-```bash
-EXPERT_SYSTEM_API_KEY="$EXPERT_SYSTEM_API_KEY" python3 {baseDir}/scripts/query.py takeaways --ids tak_abc123,tak_def456
-```
+| Param | Required | Notes |
+|-------|----------|-------|
+| `ids` | yes | Comma-separated takeaway IDs, max 50 |
 
-- `--ids` (required, comma-separated, max 50)
-
-### 3. Recent Takeaways
+### 3. Recent Takeaways — `GET /takeaways/recent`
 
 Get the latest atomic takeaways sorted by publication date (newest first).
 
-```bash
-EXPERT_SYSTEM_API_KEY="$EXPERT_SYSTEM_API_KEY" python3 {baseDir}/scripts/query.py takeaways-recent --limit 10
-```
+| Param | Required | Default | Notes |
+|-------|----------|---------|-------|
+| `limit` | no | 10 | Max 100 |
 
-- `--limit N` (optional, default 10, max 100)
-
-### 4. Documents by ID
+### 4. Documents by ID — `GET /documents`
 
 Fetch full source documents including article text.
 
-```bash
-EXPERT_SYSTEM_API_KEY="$EXPERT_SYSTEM_API_KEY" python3 {baseDir}/scripts/query.py documents --ids doc_xyz789,doc_abc123
-```
+| Param | Required | Notes |
+|-------|----------|-------|
+| `ids` | yes | Comma-separated document IDs, max 50 |
 
-- `--ids` (required, comma-separated, max 50)
-
-### 5. Research Insights
+### 5. Research Insights — `GET /research`
 
 Get AI-synthesized research insights with linked takeaways. Supports cursor pagination.
 
-```bash
-EXPERT_SYSTEM_API_KEY="$EXPERT_SYSTEM_API_KEY" python3 {baseDir}/scripts/query.py research --limit 5
-EXPERT_SYSTEM_API_KEY="$EXPERT_SYSTEM_API_KEY" python3 {baseDir}/scripts/query.py research --date 2026-03-05
-EXPERT_SYSTEM_API_KEY="$EXPERT_SYSTEM_API_KEY" python3 {baseDir}/scripts/query.py research --cursor <opaque_cursor>
-```
+| Param | Required | Default | Notes |
+|-------|----------|---------|-------|
+| `limit` | no | 4 | Max 100 |
+| `date` | no | — | Filter to single day UTC (YYYY-MM-DD) |
+| `cursor` | no | — | Opaque pagination cursor from previous response |
 
-- `--limit N` (optional, default 4, max 100)
-- `--date YYYY-MM-DD` (optional, filter to single day UTC)
-- `--cursor STRING` (optional, for pagination)
-
-### 6. Macroeconomic Data Query
+### 6. Macroeconomic Data — `POST /query/macro`
 
 Query real-time macroeconomic data from FRED using natural language.
 
-```bash
-EXPERT_SYSTEM_API_KEY="$EXPERT_SYSTEM_API_KEY" python3 {baseDir}/scripts/query.py macro --query "what is the current unemployment rate and how has it trended over the past year"
-EXPERT_SYSTEM_API_KEY="$EXPERT_SYSTEM_API_KEY" python3 {baseDir}/scripts/query.py macro --query "compare CPI and PCE inflation over the last 6 months"
-EXPERT_SYSTEM_API_KEY="$EXPERT_SYSTEM_API_KEY" python3 {baseDir}/scripts/query.py macro --query "current fed funds rate and 10-year treasury yield"
-```
+**Body:** `{ "query": "what is the current unemployment rate" }`
 
-- `--query TEXT` (required, natural-language macro question)
-
-### 7. Company Financial Data Query
+### 7. Company Financial Data — `POST /query/financial`
 
 Query company financial data from Alpha Vantage using natural language.
 
-```bash
-EXPERT_SYSTEM_API_KEY="$EXPERT_SYSTEM_API_KEY" python3 {baseDir}/scripts/query.py financial --query "what is Apple's current P/E ratio and revenue growth"
-EXPERT_SYSTEM_API_KEY="$EXPERT_SYSTEM_API_KEY" python3 {baseDir}/scripts/query.py financial --query "compare Microsoft and Google's operating margins and R&D spending"
-EXPERT_SYSTEM_API_KEY="$EXPERT_SYSTEM_API_KEY" python3 {baseDir}/scripts/query.py financial --query "show me Tesla's quarterly cash flow from operations for the last 4 quarters"
-```
-
-- `--query TEXT` (required, natural-language financial question)
+**Body:** `{ "query": "what is Apple's current P/E ratio and revenue growth" }`
 
 ## Output
 
-All commands output formatted markdown by default. Use `--raw` for JSON output suitable for piping.
+All endpoints return JSON. Parse and format results appropriately for the user's question.
