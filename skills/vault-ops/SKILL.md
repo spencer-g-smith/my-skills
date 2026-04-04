@@ -45,7 +45,7 @@ Run `obsidian help` for the full command list.
 
 ## Orientation Pattern
 1. Scan relevant folders for current state.
-2. Read the relevant `_MOC.md` for navigation and priority context.
+2. Read the relevant `_MOC.md` for navigation and priority context. If uncertain which folder applies, check `Coupa/_MOC.md`, `Personal/_MOC.md`, and `Workshop/_MOC.md` before proceeding.
 3. Follow key `[[wikilinks]]` before making edits.
 
 ## Routing Rules
