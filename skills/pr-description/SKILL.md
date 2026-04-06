@@ -1,13 +1,13 @@
 ---
 name: pr-description
-description: Create clear, concise pull request descriptions from branch diffs and recent commits. Use when a user asks to draft or generate a PR description, summary, or changelog-style overview for a branch.
+description: Create clear, concise pull request descriptions from branch diffs and recent commits, then apply them to the PR via gh. Use when a user asks to draft, generate, or update a PR description, summary, or changelog-style overview for a branch.
 ---
 
 # PR Description
 
 ## Overview
 
-Create a PR description by inspecting the branch diff and recent commits, then summarizing the user-facing intent with a minimal test plan.
+Create a PR description by inspecting the branch diff and recent commits, then summarize the user-facing intent with a minimal test plan and apply it to the PR.
 
 ## Workflow
 
@@ -26,9 +26,15 @@ Create a PR description by inspecting the branch diff and recent commits, then s
 4. Provide a test plan.
    - If tests were not run, say "Not run (not requested)"
    - If tests were run, list the exact commands
+5. Apply the description to the PR.
+   - Check if a PR already exists for the current branch: `gh pr view --json number,url`
+   - If a PR exists, update it: `gh pr edit <number> --body "<description>"`
+   - If no PR exists, inform the user and output the description for them to use when creating one
+   - Always return the PR URL when done
 
 ## Output Template
 
+```markdown
 ## Summary
 
 - [Outcome-focused bullet]
@@ -37,3 +43,4 @@ Create a PR description by inspecting the branch diff and recent commits, then s
 ## Test plan
 
 - [e.g. Not run (not requested)]
+```
